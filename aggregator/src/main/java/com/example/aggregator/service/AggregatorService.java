@@ -16,37 +16,55 @@ public class AggregatorService {
         this.aggregatorRestClient = aggregatorRestClient;
     }
 
-    public Entry getDefinitionFor(String word) {
-        return aggregatorRestClient.getDefinitionFor(word);
-    }
-
+    // Method to get words starting with a specific set of characters
     public List<Entry> getWordsStartingWith(String chars) {
-        return aggregatorRestClient.getWordsStartingWith(chars);
+        List<Entry> allWords = aggregatorRestClient.getAllWords();
+        List<Entry> results = new ArrayList<>();
+
+        for (Entry entry : allWords) {
+            if (entry.getWord().startsWith(chars)) {
+                results.add(entry);
+            }
+        }
+
+        return results;
     }
 
-    public List<Entry> getWordsThatContain(String chars) {
-        return aggregatorRestClient.getWordsThatContain(chars);
+    // Method to get words ending with a specific value
+    public List<Entry> getWordsEndingWith(String value) {
+        List<Entry> allWords = aggregatorRestClient.getAllWords();
+        List<Entry> results = new ArrayList<>();
+
+        for (Entry entry : allWords) {
+            if (entry.getWord().endsWith(value)) {
+                results.add(entry);
+            }
+        }
+
+        return results;
     }
 
-    public List<Entry> getWordsThatContainSuccessiveLettersAndStartsWith(String chars) {
+    // Extra Credit: Rewritten palindrome service method without using streams
+    public List<Entry> getAllPalindromes() {
+        List<Entry> candidates = new ArrayList<>();
 
-        List<Entry> wordsThatStartWith = aggregatorRestClient.getWordsStartingWith(chars);
-        List<Entry> wordsThatContainSuccessiveLetters = aggregatorRestClient.getWordsThatContainConsecutiveLetters();
+        // Get all words first (optimization to reduce redundant API calls)
+        List<Entry> allWords = aggregatorRestClient.getAllWords();
 
-        List<Entry> common = new ArrayList<>(wordsThatStartWith);
-        common.retainAll(wordsThatContainSuccessiveLetters);
+        // Iterate over each word to check if it is a palindrome
+        for (Entry entry : allWords) {
+            String word = entry.getWord();
 
-        return common;
+            // Check if word is a palindrome (same forward and backward)
+            String reverse = new StringBuilder(word).reverse().toString();
+            if (word.equals(reverse)) {
+                candidates.add(entry);
+            }
+        }
+
+        // Sort candidates by word
+        candidates.sort((e1, e2) -> e1.getWord().compareTo(e2.getWord()));
+
+        return candidates;
     }
-
-    public List<Entry> getWordsThatContainSpecificConsecutiveLetters(String chars) {
-
-        List<Entry> wordsThatContainSuccessiveLetters = aggregatorRestClient.getWordsThatContainConsecutiveLetters();
-
-        List<Entry> common = new ArrayList<>(wordsThatContainSuccessiveLetters);
-        common.removeIf(entry -> !entry.getWord().contains(chars));
-
-        return common;
-    }
-
 }
